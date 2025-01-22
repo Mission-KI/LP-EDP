@@ -105,7 +105,7 @@ class _BaseColumn(BaseModel):
     nullCount: int = Field(description="Number of empty entries in the column")
     numberUnique: int = Field(description="Number of unique values")
     augmentation: Optional[Augmentation] = Field(
-        default=None, description="If this column was augmented this filed contains all releveant information"
+        default=None, description="If this column was augmented this filed contains all relevant information"
     )
 
 
@@ -309,7 +309,7 @@ def export_edp_schema():
     args = _get_args()
     output: Path = args.output
     if output.is_dir():
-        output /= "edsp_schema.json"
+        output /= "edp_schema.json"
     adapter = TypeAdapter(Dict[str, Any])
     with open(output, "wb") as file:
         file.write(adapter.dump_json(ExtendedDatasetProfile.model_json_schema()))

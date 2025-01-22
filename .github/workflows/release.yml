@@ -1,0 +1,91 @@
+name: Release
+
+on:
+    push:
+        tags:
+            - "*"
+
+env:
+    EDP_SCHEMA: edp_schema_${{ github.ref_name }}.json
+    WHEEL_NAME: extended_dataset_profile.whl
+
+jobs:
+    build_wheel:
+        runs-on: ubuntu-24.04
+        name: Build Release Wheel
+        env:
+            DISTRIBUTION_DIR: "${{ github.workspace }}/dist"
+            VERSION: "${{ github.ref_name }}"
+        steps:
+            - uses: actions/checkout@v4
+            - uses: astral-sh/setup-uv@v5
+              with:
+                  python-version: 3.12
+                  enable-cache: false
+            - name: Install optional dependencies
+              run: uv sync --all-extras
+
+            - name: Build Wheel
+              run: uv tool run hatch build
+            - uses: actions/upload-artifact@v4
+              with:
+                  name: ${{ env.WHEEL_NAME }}
+                  path: "${{ env.DISTRIBUTION_DIR }}/extended_dataset_profile*.whl"
+                  if-no-files-found: error
+
+    generate_schemas:
+        runs-on: ubuntu-24.04
+        name: Generate Schemas
+        needs:
+            - build_wheel
+        steps:
+            - uses: astral-sh/setup-uv@v5
+              with:
+                  python-version: 3.12
+                  enable-cache: false
+
+            - uses: actions/download-artifact@v4
+              id: download_wheel
+              with:
+                  name: ${{ env.WHEEL_NAME }}
+                  path: ${{ github.workspace }}
+
+            - name: Install
+              run: uv pip install ${{ steps.download_wheel.outputs.download-path }}/extended_dataset_profile-*.whl
+
+            - name: Generate EDP Schema
+              run: export_edp_schema --output ${{ env.EDP_SCHEMA }}
+            - uses: actions/upload-artifact@v4
+              with:
+                  name: ${{ env.EDP_SCHEMA }}
+                  path: ${{ env.EDP_SCHEMA }}
+
+    create_release:
+        runs-on: ubuntu-24.04
+        name: Create Release
+        needs:
+            - build_wheel
+            - generate_schemas
+        env:
+            ARTIFACTS_DIR: ${{ github.workspace }}/release_artifacts
+        steps:
+            - name: Create Directory for artifacts
+              run: mkdir -p ${{ env.ARTIFACTS_DIR }}
+            - uses: actions/download-artifact@v4
+              with:
+                  name: ${{ env.EDP_SCHEMA }}
+                  path: ${{ env.ARTIFACTS_DIR }}
+
+            - uses: actions/download-artifact@v4
+              with:
+                  name: ${{ env.WHEEL_NAME }}
+                  path: ${{ env.ARTIFACTS_DIR }}
+
+            - name: Release
+              uses: softprops/action-gh-release@v2
+              with:
+                  body: "Extended Dataset Profile JSON Schema: ${{ github.ref_name }}\n"
+                  files: ${{ env.ARTIFACTS_DIR }}/*
+                  fail_on_unmatched_files: true
+                  draft: true
+                  generate_release_notes: true
