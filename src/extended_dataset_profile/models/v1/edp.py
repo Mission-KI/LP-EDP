@@ -1,12 +1,13 @@
 from argparse import ArgumentParser
 from datetime import datetime, timedelta
 from enum import Enum
-from importlib.metadata import version as get_version
 from pathlib import Path, PurePosixPath
-from typing import Annotated, Any, Dict, Iterator, List, Optional, Set, Union
+from typing import Annotated, Any, Dict, Iterator, List, Literal, Optional, Set, Union
 from uuid import UUID
 
 from pydantic import AfterValidator, BaseModel, Field, TypeAdapter
+
+from extended_dataset_profile.models.version import SchemaVersion
 
 
 class DataSpace(BaseModel):
@@ -299,8 +300,8 @@ class ComputedEdpData(BaseModel):
 
 
 class ExtendedDatasetProfile(UserProvidedEdpData, ComputedEdpData):
-    schema_version: str = Field(
-        default=get_version("extended_dataset_profile"), description="Version of EDP used to generate this EDP"
+    schema_version: Literal[SchemaVersion.V0] = Field(
+        default=SchemaVersion.V0, description="Version of the JSON Schema used to generate this EDP"
     )
 
 
