@@ -1,11 +1,10 @@
-from argparse import ArgumentParser
 from datetime import datetime, timedelta
 from enum import Enum
-from pathlib import Path, PurePosixPath
-from typing import Annotated, Any, Dict, Iterator, List, Literal, Optional, Set, Union
+from pathlib import PurePosixPath
+from typing import Annotated, Dict, Iterator, List, Literal, Optional, Set, Union
 from uuid import UUID
 
-from pydantic import AfterValidator, BaseModel, Field, TypeAdapter
+from pydantic import AfterValidator, BaseModel, Field
 
 from extended_dataset_profile.models.version import SchemaVersion
 
@@ -303,19 +302,3 @@ class ExtendedDatasetProfile(UserProvidedEdpData, ComputedEdpData):
     schema_version: Literal[SchemaVersion.V0] = Field(
         default=SchemaVersion.V0, description="Version of the JSON Schema used to generate this EDP"
     )
-
-
-def export_edp_schema():
-    args = _get_args()
-    output: Path = args.output
-    if output.is_dir():
-        output /= "edp_schema.json"
-    adapter = TypeAdapter(Dict[str, Any])
-    with open(output, "wb") as file:
-        file.write(adapter.dump_json(ExtendedDatasetProfile.model_json_schema()))
-
-
-def _get_args():
-    parser = ArgumentParser()
-    parser.add_argument("-o", "--output", type=Path, required=True, help="PurePosixPath to output the schema to")
-    return parser.parse_args()
