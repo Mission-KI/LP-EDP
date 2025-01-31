@@ -252,7 +252,37 @@ class ImageDataSet(_BaseDataSet):
     lowContrast: Optional[bool] = Field(description="Boolean indicator of whether the image is low contrast")
 
 
-DataSet = Union[StructuredDataSet, ImageDataSet]
+class ModificationState(str, Enum):
+    modified = "modified"
+    unmodified = "unmodified"
+    unknown = "unknown"
+
+
+class DocumentDataSet(_BaseDataSet):
+    """Document dataset. Used for PDF and other formats.
+    Spec for PDF metadata fields: https://opensource.adobe.com/dc-acrobat-sdk-docs/pdfstandards/pdfreference1.7old.pdf#page=843
+    """
+
+    fileSize: int = Field(description="Size of the original document")
+    title: Optional[str] = Field(description="The document's title")
+    subject: Optional[str] = Field(description="The subject of the document")
+    author: Optional[str] = Field(description="The name of the person who created the document")
+    toolchain: Optional[str] = Field(
+        description="The name of the application that created the original document or converted it"
+    )
+    creationDate: Optional[datetime] = Field(description="The date and time the document was created")
+    modificationDate: Optional[datetime] = Field(
+        description="The date and time the document was most recently modified"
+    )
+    keywords: List[str] = Field(description="Keywords associated with the document")
+    docType: str = Field(description="Document type, e.g. PDF-1.6")
+    numPages: int = Field(description="Number of pages in the document")
+    numImages: int = Field(description="Number of images in the document")
+    modified: ModificationState = Field(description="Modified from original version?")
+    encrypted: bool = Field(description="Encrypted")
+
+
+DataSet = Union[StructuredDataSet, ImageDataSet, DocumentDataSet]
 
 
 class Publisher(BaseModel):
@@ -329,7 +359,7 @@ class Compression(BaseModel):
 
 
 class ComputedEdpData(BaseModel):
-    volume: int = Field(description="Volume of the asset in MB")
+    volume: int = Field(description="Volume of the asset in bytes")
     compression: Optional[Compression] = Field(default=None, description="Description of compressions used")
     dataTypes: Set[DataSetType] = Field(description="Types of data contained in this asset")
     temporalCover: Optional[TemporalCover] = Field(
@@ -347,6 +377,10 @@ class ComputedEdpData(BaseModel):
     imageDatasets: List[ImageDataSet] = Field(
         default_factory=list,
         description="Metadata for all datasets detected to be images",
+    )
+    documentDatasets: List[DocumentDataSet] = Field(
+        default_factory=list,
+        description="Metadata for all datasets detected to be documents",
     )
 
 
