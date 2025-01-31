@@ -204,7 +204,56 @@ class StructuredDataSet(_BaseDataSet):
         return {column.name: column for column in self.all_columns}
 
 
-DataSet = Union[StructuredDataSet]
+class ImageColorMode(str, Enum):
+    BLACK_AND_WHITE = "1"
+    GRAYSCALE = "L"
+    PALETTED = "P"
+    RGB = "RGB"
+    RGBA = "RGBA"
+    CMYK = "CMYK"
+    YCBCR = "YCbCr"
+    LAB = "LAB"
+    HSV = "HSV"
+    INTEGER = "I"
+    FLOAT = "F"
+
+
+class ImageDimensions(BaseModel):
+    width: int = Field(ge=0, description="Width of the image in pixels")
+    height: int = Field(ge=0, description="Height of the image in pixels")
+
+
+class ImageDPI(BaseModel):
+    x: float = Field(ge=0.0, description="Dots Per Inch (DPI) along the x-axis")
+    y: float = Field(ge=0.0, description="Dots Per Inch (DPI) along the y-axis")
+
+
+class ImageDataSet(_BaseDataSet):
+    name: PurePosixPath = Field(description="Name of the image dataset")
+    codec: str = Field(description="The format codec of the image, such as JPEG or PNG")
+    colorMode: ImageColorMode = Field(description="Color mode of the image, such as RGB, CMYK, Grayscale, etc.")
+    resolution: ImageDimensions = Field(description="Dimensions of the image in pixels")
+    dpi: ImageDPI = Field(description="Dots Per Inch (DPI) represents the image's print resolution")
+    brightness: Optional[float] = Field(
+        ge=0.0, le=255.0, description="Average brightness of the image, higher values indicate brighter images"
+    )
+    blurriness: Optional[float] = Field(
+        ge=0.0, description="Measure of the image blurriness, with higher values indicating more blur"
+    )
+    sharpness: Optional[float] = Field(
+        ge=0.0, le=100.0, description="Measure of the image sharpness, indicating the clarity of detail"
+    )
+    brisque: Optional[float] = Field(
+        ge=0.0,
+        description="No-reference metric for assessing perceived quality of an image, with lower scores typically indicating better quality",
+    )
+    noise: Optional[float] = Field(
+        ge=0.0, description="Estimated absolute level of random variations (noise) in the image pixel intensities"
+    )
+    lowContrast: Optional[bool] = Field(description="Boolean indicator of whether the image is low contrast")
+
+
+DataSet = Union[StructuredDataSet, ImageDataSet]
 
 
 class Publisher(BaseModel):
@@ -295,6 +344,10 @@ class ComputedEdpData(BaseModel):
     structuredDatasets: List[StructuredDataSet] = Field(
         default_factory=list,
         description="Metadata for all datasets (files) detected to be structured (tables)",
+    )
+    imageDatasets: List[ImageDataSet] = Field(
+        default_factory=list,
+        description="Metadata for all datasets detected to be images",
     )
 
 
