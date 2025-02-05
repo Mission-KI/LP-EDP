@@ -78,6 +78,7 @@ FileReference = PurePosixPath
 class _BaseDataSet(BaseModel):
     uuid: UUID = Field(description="Identifier for the dataset")
     parentUuid: Optional[UUID] = Field(description="Reference to the identifier of the parent dataset, if any")
+    name: PurePosixPath = Field(description="Name of the dataset")
 
 
 class Augmentation(BaseModel):
@@ -171,7 +172,6 @@ class StringColumn(_BaseColumn):
 
 
 class StructuredDataSet(_BaseDataSet):
-    name: PurePosixPath = Field(description="Name of the structured dataset")
     rowCount: int = Field(
         description="Number of row",
     )
@@ -229,7 +229,6 @@ class ImageDPI(BaseModel):
 
 
 class ImageDataSet(_BaseDataSet):
-    name: PurePosixPath = Field(description="Name of the image dataset")
     codec: str = Field(description="The format codec of the image, such as JPEG or PNG")
     colorMode: ImageColorMode = Field(description="Color mode of the image, such as RGB, CMYK, Grayscale, etc.")
     resolution: ImageDimensions = Field(description="Dimensions of the image in pixels")
