@@ -7,7 +7,10 @@ name = "extended-dataset-profile"
 dynamic = ["version"]
 description = "EDP Schema Registry for multiple versions of the JSON schema"
 readme = "README.md"
-authors = [{ name = "Kai Buschulte", email = "kb@beebucket.de" }]
+authors = [
+    { name = "Kai Buschulte", email = "kb@beebucket.de" },
+    { name = "Joshua Lauterbach", email = "jl@beebucket.de" },
+]
 requires-python = ">=3.11"
 dependencies = ["pydantic>=2.10.5"]
 
