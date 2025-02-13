@@ -240,7 +240,7 @@ class ImageDataSet(_BaseDataSet):
         ge=0.0, description="Measure of the image blurriness, with higher values indicating more blur"
     )
     sharpness: Optional[float] = Field(
-        ge=0.0, le=100.0, description="Measure of the image sharpness, indicating the clarity of detail"
+        ge=0.0, description="Measure of the image sharpness, indicating the clarity of detail"
     )
     brisque: Optional[float] = Field(
         ge=0.0,
@@ -250,6 +250,10 @@ class ImageDataSet(_BaseDataSet):
         ge=0.0, description="Estimated absolute level of random variations (noise) in the image pixel intensities"
     )
     lowContrast: Optional[bool] = Field(description="Boolean indicator of whether the image is low contrast")
+    elaScore: Optional[float] = Field(
+        ge=0.0,
+        description="Computed Error Level Analysis (ELA) score: the average pixel intensity difference between the original image and its recompressed version",
+    )
 
 
 class ModificationState(str, Enum):
