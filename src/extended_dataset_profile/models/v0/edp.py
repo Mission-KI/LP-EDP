@@ -316,7 +316,7 @@ class DocumentDataSet(_BaseDataSet):
     )
     keywords: List[str] = Field(description="Keywords associated with the document")
     docType: str = Field(description="Document type, e.g. PDF-1.6")
-    numPages: int = Field(description="Number of pages in the document")
+    numPages: Optional[int] = Field(description="Number of pages in the document")
     numImages: int = Field(description="Number of images in the document")
     modified: ModificationState = Field(description="Modified from original version?")
     encrypted: bool = Field(description="Encrypted")
