@@ -218,9 +218,9 @@ class ImageColorMode(str, Enum):
     FLOAT = "F"
 
 
-class ImageDimensions(BaseModel):
-    width: int = Field(ge=0, description="Width of the image in pixels")
-    height: int = Field(ge=0, description="Height of the image in pixels")
+class Resolution(BaseModel):
+    width: int = Field(ge=0, description="Width in pixels")
+    height: int = Field(ge=0, description="Height in pixels")
 
 
 class ImageDPI(BaseModel):
@@ -231,7 +231,7 @@ class ImageDPI(BaseModel):
 class ImageDataSet(_BaseDataSet):
     codec: str = Field(description="The format codec of the image, such as JPEG or PNG")
     colorMode: ImageColorMode = Field(description="Color mode of the image, such as RGB, CMYK, Grayscale, etc.")
-    resolution: ImageDimensions = Field(description="Dimensions of the image in pixels")
+    resolution: Resolution = Field(description="Dimensions of the image in pixels")
     dpi: ImageDPI = Field(description="Dots Per Inch (DPI) represents the image's print resolution")
     brightness: Optional[float] = Field(
         ge=0.0, le=255.0, description="Average brightness of the image, higher values indicate brighter images"
@@ -254,6 +254,42 @@ class ImageDataSet(_BaseDataSet):
         ge=0.0,
         description="Computed Error Level Analysis (ELA) score: the average pixel intensity difference between the original image and its recompressed version",
     )
+
+
+class VideoCodec(Enum):
+    H264 = "h264"
+    HEVC = "hevc"
+    MPEG4 = "mpeg4"
+    VP9 = "vp9"
+    AV1 = "av1"
+    PRORES = "prores"
+    DNXHD = "dnxhd"
+    H263 = "h263"
+    FLV1 = "flv1"
+    WMV2 = "wmv2"
+    UNKNOWN = "unknown"
+
+
+class VideoPixelFormat(Enum):
+    YUV420P = "yuv420p"
+    YUV422P = "yuv422p"
+    YUV444P = "yuv444p"
+    NV12 = "nv12"
+    GRAY = "gray"
+    RGB24 = "rgb24"
+    BGR24 = "bgr24"
+    YUVJ420P = "yuvj420p"
+    YUVJ422P = "yuvj422p"
+    YUVJ444P = "yuvj444p"
+    UNKNOWN = "unknown"
+
+
+class VideoDataSet(_BaseDataSet):
+    codec: VideoCodec = Field(description="The format codec of the video, such as H264 or HEVC")
+    resolution: Resolution = Field(description="Dimensions of the video in pixels")
+    fps: float = Field(description="Frames per second of the video")
+    duration: float = Field(description="Duration of the video in seconds")
+    pixel_format: VideoPixelFormat = Field(description="Pixel format of the video")
 
 
 class ModificationState(str, Enum):
@@ -286,7 +322,7 @@ class DocumentDataSet(_BaseDataSet):
     encrypted: bool = Field(description="Encrypted")
 
 
-DataSet = Union[StructuredDataSet, ImageDataSet, DocumentDataSet]
+DataSet = Union[StructuredDataSet, ImageDataSet, VideoDataSet, DocumentDataSet]
 
 
 class Publisher(BaseModel):
@@ -381,6 +417,10 @@ class ComputedEdpData(BaseModel):
     imageDatasets: List[ImageDataSet] = Field(
         default_factory=list,
         description="Metadata for all datasets detected to be images",
+    )
+    videoDatasets: List[VideoDataSet] = Field(
+        default_factory=list,
+        description="Metadata for all datasets detected to be videos",
     )
     documentDatasets: List[DocumentDataSet] = Field(
         default_factory=list,
