@@ -50,6 +50,7 @@ warn_return_any = true
 warn_unused_configs = true
 exclude = ["build", ".venv"]
 check_untyped_defs = true
+sqlite_cache = true
 
 [tool.coverage.run]
 relative_files = true
