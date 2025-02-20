@@ -4,7 +4,7 @@ from pathlib import PurePosixPath
 from typing import Annotated, Dict, Iterator, List, Literal, Optional, Set, Union
 from uuid import UUID
 
-from pydantic import AfterValidator, BaseModel, Field
+from pydantic import AfterValidator, BaseModel, Field, model_validator
 
 from extended_dataset_profile.models.version import SchemaVersion
 
@@ -322,7 +322,35 @@ class DocumentDataSet(_BaseDataSet):
     encrypted: bool = Field(description="Encrypted")
 
 
-DataSet = Union[StructuredDataSet, ImageDataSet, VideoDataSet, DocumentDataSet]
+class Chunk(BaseModel):
+    """Chunk of text identified by its start and end lines. The indices are 0-based."""
+
+    startLine: int = Field(description="Inclusive start line index.")
+    endLine: int = Field(description="Exclusive end line index.")
+
+    @model_validator(mode="after")
+    def _end_after_start(self):
+        if self.endLine <= self.startLine:
+            raise RuntimeError("End line index must be larger than start line index!")
+        return self
+
+    def __len__(self) -> int:
+        return self.endLine - self.startLine
+
+
+class EmbeddedTable(Chunk):
+    structuredDatasetUuid: UUID
+
+
+class UnstructuredTextDataSet(_BaseDataSet):
+    embeddedTables: List[EmbeddedTable] = Field(
+        default_factory=list, description="Chunks that are identified to contain tables."
+    )
+    lineCount: int = Field(description="Number of lines (excluding embedded tables) inside the text block.")
+    wordCount: int = Field(description="Number of words (excluding embedded tables) inside the text block.")
+
+
+DataSet = Union[StructuredDataSet, ImageDataSet, VideoDataSet, DocumentDataSet, UnstructuredTextDataSet]
 
 
 class Publisher(BaseModel):
