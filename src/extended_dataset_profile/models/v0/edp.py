@@ -48,7 +48,8 @@ class DataSetImmutability(str, Enum):
 
 class DataSetType(str, Enum):
     structured = "structured"
-    semi_structured = "semi-structured"
+    semiStructured = "semiStructured"
+    unstructuredText = "unstructuredText"
     image = "image"
     video = "video"
     audio = "audio"
@@ -440,7 +441,10 @@ class ComputedEdpData(BaseModel):
 
     structuredDatasets: List[StructuredDataSet] = Field(
         default_factory=list,
-        description="Metadata for all datasets (files) detected to be structured (tables)",
+        description="Metadata for all datasets detected to be structured (tables)",
+    )
+    unstructuredTextDatasets: List[UnstructuredTextDataSet] = Field(
+        default_factory=list, description="Metadata for all datasets detected to be unstructured text (e.g. txt files)"
     )
     imageDatasets: List[ImageDataSet] = Field(
         default_factory=list,
