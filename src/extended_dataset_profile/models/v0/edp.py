@@ -6,6 +6,7 @@ from uuid import UUID
 
 from pydantic import AfterValidator, BaseModel, Field, model_validator
 
+from extended_dataset_profile.models.v0.languages import Language
 from extended_dataset_profile.models.version import SchemaVersion
 
 
@@ -347,6 +348,7 @@ class UnstructuredTextDataSet(_BaseDataSet):
     embeddedTables: List[EmbeddedTable] = Field(
         default_factory=list, description="Chunks that are identified to contain tables."
     )
+    languages: Set[Language] = Field(description="Set of ISO369-3 languages identifiers detected in the text.")
     lineCount: int = Field(description="Number of lines (excluding embedded tables) inside the text block.")
     wordCount: int = Field(description="Number of words (excluding embedded tables) inside the text block.")
 
