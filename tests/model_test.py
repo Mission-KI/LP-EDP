@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from logging import getLogger
 from pathlib import PurePosixPath
@@ -9,6 +9,7 @@ from uuid import UUID
 from pydantic import AnyUrl, BaseModel
 
 from extended_dataset_profile import SchemaVersion, schema_versions
+from extended_dataset_profile.models.v0.edp import DataSpace, License, Publisher, UserProvidedEdpData
 from extended_dataset_profile.models.v0.languages import Language
 
 logger = getLogger(__name__)
@@ -55,3 +56,25 @@ def _validate_model_type(current_type: type):
             yield from _validate_model_type(generic_type)
     else:
         raise TypeError(str(current_type))
+
+
+def test_recursively_escape_strings():
+    user_provided_data = UserProvidedEdpData(
+        assetId="my-dataset-id",
+        name="Hello <script>alert('XSS');</script>",
+        url="https://beebucket.ai/en/",
+        dataCategory="TestDataCategory",
+        dataSpace=DataSpace(name="Hello <script>alert('XSS');</script>", url="https://beebucket.ai/en/"),
+        publisher=Publisher(name="beebucket"),
+        license=License(url="https://opensource.org/license/mit"),
+        description="Our very first test edp",
+        publishDate=datetime(year=1995, month=10, day=10, hour=10, tzinfo=timezone.utc),
+        version="2.3.1",
+        tags=["test", "Hello <script>alert('XSS');</script>"],
+        freely_available=True,
+    )
+    expected_escaped = "Hello &lt;script&gt;alert(&#x27;XSS&#x27;);&lt;/script&gt;"
+
+    assert user_provided_data.name == expected_escaped
+    assert user_provided_data.dataSpace.name == expected_escaped
+    assert user_provided_data.tags[1] == expected_escaped
