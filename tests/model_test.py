@@ -9,6 +9,7 @@ from uuid import UUID
 from pydantic import AnyUrl, BaseModel
 
 from extended_dataset_profile import SchemaVersion, schema_versions
+from extended_dataset_profile.models.v0.languages import Language
 
 logger = getLogger(__name__)
 
@@ -47,6 +48,8 @@ def _validate_model_type(current_type: type):
         pass
     elif isinstance(current_type, type) and issubclass(current_type, BaseModel):
         yield current_type
+    elif current_type is Language:
+        pass
     elif get_origin(current_type) in [Union, list, set]:
         for generic_type in get_args(current_type):
             yield from _validate_model_type(generic_type)

@@ -3,21 +3,21 @@ from typing import Annotated
 from pydantic import AfterValidator
 
 
-def is_iso369_3(text: str) -> bool:
-    return text in _ISO369_3_LANGUAGES
+def is_iso639_3(text: str) -> bool:
+    return text in _ISO639_3_LANGUAGES
 
 
-def _iso369_3_validator(text: str) -> str:
+def _iso639_3_validator(text: str) -> str:
     text = text.lower()
-    if not is_iso369_3(text):
+    if not is_iso639_3(text):
         raise ValueError(f'"{text}" is not a ISO369-3 language string!')
     return text
 
 
-Language = Annotated[str, AfterValidator(_iso369_3_validator)]
+Language = Annotated[str, AfterValidator(_iso639_3_validator)]
 
 
-_ISO369_3_LANGUAGES = set(
+_ISO639_3_LANGUAGES = set(
     [
         "duo",  # Dupaninan Agta
         "lai",  # Lambya

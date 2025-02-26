@@ -348,7 +348,7 @@ class UnstructuredTextDataSet(_BaseDataSet):
     embeddedTables: List[EmbeddedTable] = Field(
         default_factory=list, description="Chunks that are identified to contain tables."
     )
-    languages: Set[Language] = Field(description="Set of ISO369-3 languages identifiers detected in the text.")
+    languages: Set[Language] = Field(description="Set of ISO639-3 languages identifiers detected in the text.")
     lineCount: int = Field(description="Number of lines (excluding embedded tables) inside the text block.")
     wordCount: int = Field(description="Number of words (excluding embedded tables) inside the text block.")
 

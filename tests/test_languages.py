@@ -1,17 +1,17 @@
 from pydantic import BaseModel
 from pytest import raises
 
-from extended_dataset_profile.models.v0.languages import Language, is_iso369_3
+from extended_dataset_profile.models.v0.languages import Language, is_iso639_3
 
 
 class Model(BaseModel):
     language: Language
 
 
-def test_is_iso369_3():
-    assert is_iso369_3("deu")
-    assert not is_iso369_3("blabla")
-    assert not is_iso369_3("en")
+def test_is_iso639_3():
+    assert is_iso639_3("deu")
+    assert not is_iso639_3("blabla")
+    assert not is_iso639_3("en")
 
 
 def test_annotated_language_type():
