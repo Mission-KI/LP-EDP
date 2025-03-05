@@ -1,8 +1,7 @@
-import html
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import PurePosixPath
-from typing import Annotated, Any, Dict, Iterator, List, Literal, Optional, Set, Union
+from typing import Annotated, Dict, Iterator, List, Literal, Optional, Set, Union
 from uuid import UUID
 
 from pydantic import AfterValidator, BaseModel, Field, model_validator
@@ -91,15 +90,6 @@ class Augmentation(BaseModel):
         description="The calculation that was applied to the source columns to create the augmented column",
     )
     parameters: List[str] = Field(default_factory=list, description="The parameters used for the calculation")
-
-
-class AugmentedColumn(BaseModel):
-    name: str = Field(description="Name of the augmented column")
-    file: Optional[PurePosixPath] = Field(
-        default=None,
-        description="Path of the augmented file this column was added. If augmentedFile is None, EDPS will assume that the augmented column contained in all files.",
-    )
-    augmentation: Augmentation = Field(description="Augmentation information")
 
 
 class _BaseColumn(BaseModel):
@@ -373,9 +363,15 @@ def validate_license(license: License):
     return license
 
 
-class UserProvidedEdpData(BaseModel):
-    """The part of the EDP dataset that can not be automatically generated, but needs to be provided by the user."""
+class Compression(BaseModel):
+    algorithms: Set[str] = Field(description="List of all used compression algorithms in an asset")
+    extractedSize: int = Field(description="Size in bytes when all compressions got extracted")
 
+
+class ExtendedDatasetProfile(BaseModel):
+    schema_version: Literal[SchemaVersion.V0] = Field(
+        default=SchemaVersion.V0, description="Version of the JSON Schema used to generate this EDP"
+    )
     assetId: str = Field(description="The asset ID is a unique identifier for an asset within a data room")
     name: str = Field(description="Name of the asset")
     url: str = Field(description="The URL via which the asset can be found in the published data room")
@@ -419,23 +415,6 @@ class UserProvidedEdpData(BaseModel):
         description="Whether asset is freely available. That means, there is no registration or login needed to download it."
     )
 
-    @model_validator(mode="before")
-    @classmethod
-    def escape_all_string_fields(cls, data: Any) -> Any:
-        return recursively_escape_strings(data)
-
-
-class Config(BaseModel):
-    userProvidedEdpData: UserProvidedEdpData = Field(description="User provided EDP meta data")
-    augmentedColumns: List[AugmentedColumn] = Field(default_factory=list, description="List of augmented columns")
-
-
-class Compression(BaseModel):
-    algorithms: Set[str] = Field(description="List of all used compression algorithms in an asset")
-    extractedSize: int = Field(description="Size in bytes when all compressions got extracted")
-
-
-class ComputedEdpData(BaseModel):
     volume: int = Field(description="Volume of the asset in bytes")
     compression: Optional[Compression] = Field(default=None, description="Description of compressions used")
     dataTypes: Set[DataSetType] = Field(description="Types of data contained in this asset")
@@ -466,26 +445,3 @@ class ComputedEdpData(BaseModel):
         default_factory=list,
         description="Metadata for all datasets detected to be documents",
     )
-
-
-class ExtendedDatasetProfile(UserProvidedEdpData, ComputedEdpData):
-    schema_version: Literal[SchemaVersion.V0] = Field(
-        default=SchemaVersion.V0, description="Version of the JSON Schema used to generate this EDP"
-    )
-
-
-def recursively_escape_strings(data: Any) -> Any:
-    if data is None or isinstance(data, (bool, datetime)):
-        return data
-    elif isinstance(data, str):
-        return html.escape(data)
-    elif isinstance(data, list):
-        return [recursively_escape_strings(item) for item in data]
-    elif isinstance(data, dict):
-        return {k: recursively_escape_strings(v) for k, v in data.items()}
-    elif isinstance(data, BaseModel):
-        as_dict = data.model_dump()
-        escaped_dict = recursively_escape_strings(as_dict)
-        return data.__class__(**escaped_dict)
-    else:
-        raise NotImplementedError(f"Type {type(data)} not supported")
