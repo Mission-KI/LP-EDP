@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import PurePosixPath
 from typing import Annotated, Dict, Iterator, List, Literal, Optional, Set, Union
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from pydantic import AfterValidator, BaseModel, Field, model_validator
 
@@ -48,6 +48,7 @@ class DataSetImmutability(str, Enum):
 
 
 class DataSetType(str, Enum):
+    archive = "archive"
     structured = "structured"
     semiStructured = "semiStructured"
     unstructuredText = "unstructuredText"
@@ -78,9 +79,20 @@ FileReference = PurePosixPath
 
 
 class _BaseDataSet(BaseModel):
-    uuid: UUID = Field(description="Identifier for the dataset")
-    parentUuid: Optional[UUID] = Field(description="Reference to the identifier of the parent dataset, if any")
-    name: PurePosixPath = Field(description="Name of the dataset")
+    uuid: UUID = Field(default_factory=uuid4, description="Identifier for the dataset")
+    parentUuid: Optional[UUID] = Field(
+        default=None, description="Reference to the identifier of the parent dataset, if any"
+    )
+    name: str = Field(default_factory=lambda: "", description="Name of the dataset")
+
+
+class ArchiveDataSet(_BaseDataSet):
+    """Dataset representing an archive."""
+
+    algorithm: str = Field(description="Compression algorithm used by this archive.")
+    extractedSize: int = Field(
+        description="Size in bytes when the archive is extracted. Does not include recursive archives."
+    )
 
 
 class Augmentation(BaseModel):
@@ -348,11 +360,6 @@ class UnstructuredTextDataSet(_BaseDataSet):
     wordCount: int = Field(description="Number of words (excluding embedded tables) inside the text block.")
 
 
-DataSet = Union[
-    StructuredDataSet, ImageDataSet, VideoDataSet, DocumentDataSet, UnstructuredTextDataSet, SemiStructuredDataSet
-]
-
-
 class Publisher(BaseModel):
     name: str = Field(description="Name of the publisher")
     url: Optional[str] = Field(default=None, description="URL to the publisher")
@@ -367,11 +374,6 @@ def validate_license(license: License):
     if license.name is None and license.url is None:
         raise ValueError("License model needs at least 'name' or 'url'")
     return license
-
-
-class Compression(BaseModel):
-    algorithms: Set[str] = Field(description="List of all used compression algorithms in an asset")
-    extractedSize: int = Field(description="Size in bytes when all compressions got extracted")
 
 
 class ExtendedDatasetProfile(BaseModel):
@@ -422,8 +424,7 @@ class ExtendedDatasetProfile(BaseModel):
     )
 
     volume: int = Field(description="Volume of the asset in bytes")
-    compression: Optional[Compression] = Field(default=None, description="Description of compressions used")
-    dataTypes: Set[DataSetType] = Field(description="Types of data contained in this asset")
+    dataTypes: Set[DataSetType] = Field(default_factory=set, description="Types of data contained in this asset")
     temporalCover: Optional[TemporalCover] = Field(
         default=None, description="Earliest and latest dates contained in this asset"
     )
@@ -432,6 +433,9 @@ class ExtendedDatasetProfile(BaseModel):
         description="The periodicity of the index date time field of the first structured dataset",
     )
 
+    archiveDatasets: List[ArchiveDataSet] = Field(
+        default_factory=list, description="Metadata for all archives detected"
+    )
     structuredDatasets: List[StructuredDataSet] = Field(
         default_factory=list,
         description="Metadata for all datasets detected to be structured (tables)",
