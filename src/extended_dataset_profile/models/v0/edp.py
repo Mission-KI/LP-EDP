@@ -197,6 +197,10 @@ class StructuredDataSet(_BaseDataSet):
         return {column.name: column for column in self.all_columns}
 
 
+class SemiStructuredDataSet(_BaseDataSet):
+    jsonSchema: str = Field(description="JSON schema of the semi-structured data")
+
+
 class ImageColorMode(str, Enum):
     BLACK_AND_WHITE = "1"
     GRAYSCALE = "L"
@@ -344,7 +348,9 @@ class UnstructuredTextDataSet(_BaseDataSet):
     wordCount: int = Field(description="Number of words (excluding embedded tables) inside the text block.")
 
 
-DataSet = Union[StructuredDataSet, ImageDataSet, VideoDataSet, DocumentDataSet, UnstructuredTextDataSet]
+DataSet = Union[
+    StructuredDataSet, ImageDataSet, VideoDataSet, DocumentDataSet, UnstructuredTextDataSet, SemiStructuredDataSet
+]
 
 
 class Publisher(BaseModel):
@@ -429,6 +435,9 @@ class ExtendedDatasetProfile(BaseModel):
     structuredDatasets: List[StructuredDataSet] = Field(
         default_factory=list,
         description="Metadata for all datasets detected to be structured (tables)",
+    )
+    semiStructuredDatasets: List[SemiStructuredDataSet] = Field(
+        default_factory=list, description="Metadata for all datasets detected to be semi-structured"
     )
     unstructuredTextDatasets: List[UnstructuredTextDataSet] = Field(
         default_factory=list, description="Metadata for all datasets detected to be unstructured text (e.g. txt files)"
