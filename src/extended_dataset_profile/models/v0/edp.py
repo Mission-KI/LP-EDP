@@ -3,16 +3,11 @@ from enum import Enum
 from pathlib import PurePosixPath
 from typing import Annotated, Dict, Iterator, List, Literal, Optional, Set, Union
 
-from pydantic import AfterValidator, BaseModel, Field, model_validator
+from pydantic import AfterValidator, AnyUrl, BaseModel, Field, model_validator
 
 from extended_dataset_profile.models.v0.json_reference import JsonReference
 from extended_dataset_profile.models.v0.languages import Language
 from extended_dataset_profile.models.version import SchemaVersion
-
-
-class DataSpace(BaseModel):
-    name: str = Field(description="Name of the dataspace")
-    url: str = Field(description="URL of the dataspace")
 
 
 class AssetProcessingStatus(str, Enum):
@@ -391,22 +386,31 @@ def validate_license(license: License):
     return license
 
 
-class ExtendedDatasetProfile(BaseModel):
-    schema_version: Literal[SchemaVersion.V0] = Field(
-        default=SchemaVersion.V0, description="Version of the JSON Schema used to generate this EDP"
-    )
-    assetId: str = Field(description="The asset ID is a unique identifier for an asset within a data room")
-    name: str = Field(description="Name of the asset")
-    url: str = Field(description="The URL via which the asset can be found in the published data room")
-    dataCategory: Optional[str] = Field(
-        default=None,
-        description="A data room-specific categorization of the asset (e.g. https://github.com/Mobility-Data-Space/mobility-data-space/wiki/MDS-Ontology",
-    )
-    dataSpace: DataSpace = Field(description="Dataspace the asset can be found")
+class DataSpaceReference(BaseModel):
+    assetId: str = Field(description="Unique identifier for an asset within the dataspace")
+    dataSpaceName: str = Field(description="Name of the dataspace")
+    assetUrl: AnyUrl = Field(description="URL where the asset can be found in the published dataspace")
+    assetVersion: Optional[str] = Field(default=None, description="Provide supplied version of the asset")
     publisher: Publisher = Field(description="Provider that placed the asset in the data room")
     publishDate: datetime = Field(description="Date on which this asset has been published")
     license: Annotated[License, AfterValidator(validate_license)] = Field(
         description="Describes the data license under which the asset is made available by the data provider (see also https://www.dcat-ap.de/def/licenses/)"
+    )
+
+
+class ExtendedDatasetProfile(BaseModel):
+    schema_version: Literal[SchemaVersion.V0] = Field(
+        default=SchemaVersion.V0, description="Version of the JSON Schema used to generate this EDP"
+    )
+    name: str = Field(description="Name of the asset")
+    dataSpaceRefs: List[DataSpaceReference] = Field(
+        min_length=1,
+        default_factory=list,
+        description="References to multiple dataspace locations for the asset",
+    )
+    dataCategory: Optional[str] = Field(
+        default=None,
+        description="A data room-specific categorization of the asset (e.g. https://github.com/Mobility-Data-Space/mobility-data-space/wiki/MDS-Ontology",
     )
     assetProcessingStatus: Optional[AssetProcessingStatus] = Field(
         default=AssetProcessingStatus.original_data, description="Processing status of the asset"
