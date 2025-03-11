@@ -2,10 +2,10 @@ from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import PurePosixPath
 from typing import Annotated, Dict, Iterator, List, Literal, Optional, Set, Union
-from uuid import UUID, uuid4
 
 from pydantic import AfterValidator, BaseModel, Field, model_validator
 
+from extended_dataset_profile.models.v0.json_reference import JsonReference
 from extended_dataset_profile.models.v0.languages import Language
 from extended_dataset_profile.models.version import SchemaVersion
 
@@ -78,15 +78,23 @@ Numeric = Union[int, float, timedelta, complex]
 FileReference = PurePosixPath
 
 
-class _BaseDataSet(BaseModel):
-    uuid: UUID = Field(default_factory=uuid4, description="Identifier for the dataset")
-    parentUuid: Optional[UUID] = Field(
-        default=None, description="Reference to the identifier of the parent dataset, if any"
+class FileProperties(BaseModel):
+    name: str = Field(description="Original file name")
+    size: int = Field(description="Size of the file in bytes.")
+
+
+class DatasetTreeNode(BaseModel):
+    dataset: JsonReference = Field(description="Reference to the dataset this node refers to.")
+    parent: Optional[JsonReference] = Field(
+        default=None, description="Reference to the dataset tree node of the parent dataset, if any"
     )
-    name: str = Field(default_factory=lambda: "", description="Name of the dataset")
+    name: str = Field(description="Name of the dataset")
+    fileProperties: Optional[FileProperties] = Field(
+        description="File specific properties, if this dataset is a file. Otherwise none."
+    )
 
 
-class ArchiveDataSet(_BaseDataSet):
+class ArchiveDataSet(BaseModel):
     """Dataset representing an archive."""
 
     algorithm: str = Field(description="Compression algorithm used by this archive.")
@@ -176,7 +184,7 @@ class StringColumn(_BaseColumn):
     pass
 
 
-class StructuredDataSet(_BaseDataSet):
+class StructuredDataSet(BaseModel):
     rowCount: int = Field(
         description="Number of row",
     )
@@ -209,7 +217,7 @@ class StructuredDataSet(_BaseDataSet):
         return {column.name: column for column in self.all_columns}
 
 
-class SemiStructuredDataSet(_BaseDataSet):
+class SemiStructuredDataSet(BaseModel):
     jsonSchema: str = Field(description="JSON schema of the semi-structured data")
 
 
@@ -237,7 +245,7 @@ class ImageDPI(BaseModel):
     y: float = Field(ge=0.0, description="Dots Per Inch (DPI) along the y-axis")
 
 
-class ImageDataSet(_BaseDataSet):
+class ImageDataSet(BaseModel):
     codec: str = Field(description="The format codec of the image, such as JPEG or PNG")
     colorMode: ImageColorMode = Field(description="Color mode of the image, such as RGB, CMYK, Grayscale, etc.")
     resolution: Resolution = Field(description="Dimensions of the image in pixels")
@@ -293,7 +301,7 @@ class VideoPixelFormat(Enum):
     UNKNOWN = "unknown"
 
 
-class VideoDataSet(_BaseDataSet):
+class VideoDataSet(BaseModel):
     codec: VideoCodec = Field(description="The format codec of the video, such as H264 or HEVC")
     resolution: Resolution = Field(description="Dimensions of the video in pixels")
     fps: float = Field(description="Frames per second of the video")
@@ -307,12 +315,11 @@ class ModificationState(str, Enum):
     unknown = "unknown"
 
 
-class DocumentDataSet(_BaseDataSet):
+class DocumentDataSet(BaseModel):
     """Document dataset. Used for PDF and other formats.
     Spec for PDF metadata fields: https://opensource.adobe.com/dc-acrobat-sdk-docs/pdfstandards/pdfreference1.7old.pdf#page=843
     """
 
-    fileSize: int = Field(description="Size of the original document")
     title: Optional[str] = Field(description="The document's title")
     subject: Optional[str] = Field(description="The subject of the document")
     author: Optional[str] = Field(description="The name of the person who created the document")
@@ -348,10 +355,12 @@ class Chunk(BaseModel):
 
 
 class EmbeddedTable(Chunk):
-    structuredDatasetUuid: UUID
+    structuredDatasetName: str = Field(
+        description="Name of the structured dataset this embedded dataset got analyzed as."
+    )
 
 
-class UnstructuredTextDataSet(_BaseDataSet):
+class UnstructuredTextDataSet(BaseModel):
     embeddedTables: List[EmbeddedTable] = Field(
         default_factory=list, description="Chunks that are identified to contain tables."
     )
@@ -457,4 +466,9 @@ class ExtendedDatasetProfile(BaseModel):
     documentDatasets: List[DocumentDataSet] = Field(
         default_factory=list,
         description="Metadata for all datasets detected to be documents",
+    )
+
+    datasetTree: List[DatasetTreeNode] = Field(
+        default_factory=list,
+        description="List of tree nodes that describe the hierarchy of the datasets contained in this extended dataset profile.",
     )
