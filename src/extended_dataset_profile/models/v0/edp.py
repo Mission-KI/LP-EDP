@@ -110,9 +110,16 @@ class Augmentation(BaseModel):
 
 class _BaseColumn(BaseModel):
     name: str = Field(description="Name of the column")
-    nonNullCount: int = Field(description="Number of non empty entries in the column")
-    nullCount: int = Field(description="Number of empty entries in the column")
-    numberUnique: int = Field(description="Number of unique values")
+    nullCount: int = Field(
+        description="Number of empty and null entries in the column. Does not include the count of inconsistent entries."
+    )
+    inconsistentCount: int = Field(
+        description="Number of entries which are inconsistent with the determined data type of this column."
+    )
+    interpretableCount: int = Field(
+        description="Number of entries which are not empty and could be converted to the determined type of this column."
+    )
+    numberUnique: int = Field(description="Number of unique values.")
     augmentation: Optional[Augmentation] = Field(
         default=None, description="If this column was augmented this filed contains all relevant information"
     )
