@@ -146,6 +146,9 @@ class NumericColumn(_BaseColumn):
     lowerIQR: Numeric = Field(description="Value of the lower limit of the inter quartile range (25%)")
     iqr: Numeric = Field(description="Value of the inter quartile range")
     iqrOutlierCount: int = Field(description="Number of elements outside of the inter quartile range")
+    relativeOutlierCount: float = Field(
+        description="Averages all outlier counts into a relative outlier measure [0.0, 1.0].", ge=0.0, le=1.0
+    )
     distribution: str = Field(description="The best fitting distribution for the data in this column")
     distributionGraph: Optional[FileReference] = Field(
         default=None, description="Link to the combined histogram/distribution graph"
