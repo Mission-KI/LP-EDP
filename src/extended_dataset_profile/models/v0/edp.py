@@ -185,6 +185,12 @@ class StringColumn(_BaseColumn):
     pass
 
 
+class CorrelationSummary(BaseModel):
+    no: int = Field(default=0, description="Count of column pairs with no correlation")
+    partial: int = Field(default=0, description="Count of column pairs with partial correlation")
+    strong: int = Field(default=0, description="Count of column pairs with strong correlation")
+
+
 class StructuredDataSet(BaseModel):
     rowCount: int = Field(
         description="Number of row",
@@ -199,6 +205,7 @@ class StructuredDataSet(BaseModel):
     correlationGraph: Optional[FileReference] = Field(
         default=None, description="Reference to a correlation graph of the data columns"
     )
+    correlationSummary: CorrelationSummary = Field(description="Mapping from correlation level to count of occurrences")
     numericColumns: List[NumericColumn] = Field(description="Numeric columns in this dataset")
     datetimeColumns: List[DateTimeColumn] = Field(description="Datetime columns in this dataset")
     stringColumns: List[StringColumn] = Field(
