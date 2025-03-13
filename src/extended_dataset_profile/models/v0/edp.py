@@ -132,6 +132,7 @@ class NumericColumn(_BaseColumn):
     max: Numeric
     mean: Numeric
     median: Numeric
+    variance: Numeric = Field(description="Statistical variance of this column")
     stddev: Numeric
     upperPercentile: Numeric = Field(description="Value of the upper 1% quantile")
     lowerPercentile: Numeric = Field(description="Value of the lower 1% quantile")
