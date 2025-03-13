@@ -128,12 +128,12 @@ class TimeBasedGraph(BaseModel):
 
 
 class NumericColumn(_BaseColumn):
-    min: Numeric
-    max: Numeric
-    mean: Numeric
-    median: Numeric
+    min: Numeric = Field(description="Minimum value that occurred in this column")
+    max: Numeric = Field(description="Maximum value that occurred in this column")
+    mean: Numeric = Field(description="Mean of all values in this column")
+    median: Numeric = Field(description="Median of all values in this column")
     variance: Numeric = Field(description="Statistical variance of this column")
-    stddev: Numeric
+    stddev: Numeric = Field(description="Statistical standard deviation of this column")
     upperPercentile: Numeric = Field(description="Value of the upper 1% quantile")
     lowerPercentile: Numeric = Field(description="Value of the lower 1% quantile")
     upperQuantile: Numeric = Field(description="Value of the upper 25% quantile")
@@ -163,7 +163,9 @@ class NumericColumn(_BaseColumn):
     residuals: List[TimeBasedGraph] = Field(
         default_factory=list, description="Residual graphs over all available date time columns"
     )
-    dataType: str
+    dataType: str = Field(
+        description="More specific type the data in this column can be represented at without loosing information"
+    )
 
 
 class TemporalCover(BaseModel):
