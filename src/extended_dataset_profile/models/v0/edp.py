@@ -1,9 +1,9 @@
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import PurePosixPath
-from typing import Annotated, Dict, Iterator, List, Literal, Optional, Set, Union
+from typing import Dict, Iterator, List, Literal, Optional, Set, Union
 
-from pydantic import AfterValidator, AnyUrl, BaseModel, Field, model_validator
+from pydantic import AnyUrl, BaseModel, Field, model_validator
 
 from extended_dataset_profile.models.v0.json_reference import JsonReference
 from extended_dataset_profile.models.v0.languages import Language
@@ -379,11 +379,11 @@ class License(BaseModel):
     name: Optional[str] = Field(default=None, description="Name of the license")
     url: Optional[str] = Field(default=None, description="URL describing the license")
 
-
-def validate_license(license: License):
-    if license.name is None and license.url is None:
-        raise ValueError("License model needs at least 'name' or 'url'")
-    return license
+    @model_validator(mode="after")
+    def validate_license(self) -> "License":
+        if self.name is None and self.url is None:
+            raise ValueError("License model needs at least 'name' or 'url'")
+        return self
 
 
 class DataSpaceReference(BaseModel):
@@ -393,7 +393,7 @@ class DataSpaceReference(BaseModel):
     assetVersion: Optional[str] = Field(default=None, description="Provide supplied version of the asset")
     publisher: Publisher = Field(description="Provider that placed the asset in the data room")
     publishDate: datetime = Field(description="Date on which this asset has been published")
-    license: Annotated[License, AfterValidator(validate_license)] = Field(
+    license: License = Field(
         description="Describes the data license under which the asset is made available by the data provider (see also https://www.dcat-ap.de/def/licenses/)"
     )
 
