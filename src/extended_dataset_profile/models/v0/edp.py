@@ -75,6 +75,7 @@ FileReference = PurePosixPath
 
 class FileProperties(BaseModel):
     name: str = Field(description="Original file name")
+    fileType: str = Field(description="File type")
     size: int = Field(description="Size of the file in bytes.")
 
 
