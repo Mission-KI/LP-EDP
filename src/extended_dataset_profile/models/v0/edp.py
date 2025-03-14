@@ -393,11 +393,16 @@ class License(BaseModel):
         return self
 
 
-class DataSpaceReference(BaseModel):
+class DataSpace(BaseModel):
+    name: str = Field(description="Name of the dataspace")
+    url: str = Field(description="URL of the dataspace")
+
+
+class AssetReference(BaseModel):
     assetId: str = Field(description="Unique identifier for an asset within the dataspace")
-    dataSpaceName: str = Field(description="Name of the dataspace")
     assetUrl: AnyUrl = Field(description="URL where the asset can be found in the published dataspace")
     assetVersion: Optional[str] = Field(default=None, description="Provide supplied version of the asset")
+    dataSpace: DataSpace = Field(description="Dataspace the asset can be found")
     publisher: Publisher = Field(description="Provider that placed the asset in the data room")
     publishDate: datetime = Field(description="Date on which this asset has been published")
     license: License = Field(
@@ -410,7 +415,7 @@ class ExtendedDatasetProfile(BaseModel):
         default=SchemaVersion.V0, description="Version of the JSON Schema used to generate this EDP"
     )
     name: str = Field(description="Name of the asset")
-    dataSpaceRefs: List[DataSpaceReference] = Field(
+    assetRefs: List[AssetReference] = Field(
         min_length=1,
         default_factory=list,
         description="References to multiple dataspace locations for the asset",
@@ -427,7 +432,6 @@ class ExtendedDatasetProfile(BaseModel):
     dataSubCategory: Optional[str] = Field(
         default=None, description="A data room-specific sub-categorization for assetDataCategory"
     )
-    version: Optional[str] = Field(default=None, description="Provide supplied version of the asset")
     transferTypeFlag: Optional[DataSetTransfer] = Field(
         default=None, description="Describes whether an asset grows steadily over time "
     )
