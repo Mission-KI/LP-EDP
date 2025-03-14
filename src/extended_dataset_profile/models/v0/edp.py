@@ -434,6 +434,9 @@ class ExtendedDatasetProfile(BaseModel):
         default=None, description="A data room-specific sub-categorization for assetDataCategory"
     )
     assetTypeInfo: Optional[str] = Field(default=None, description="Additional type-specific information for the asset")
+    generatedBy: str = Field(
+        description="Name and version of the toolchain that generated this extended dataset profile"
+    )
     transferTypeFlag: Optional[DataSetTransfer] = Field(
         default=None, description="Describes whether an asset grows steadily over time "
     )
