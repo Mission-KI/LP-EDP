@@ -433,6 +433,7 @@ class ExtendedDatasetProfile(BaseModel):
     dataSubCategory: Optional[str] = Field(
         default=None, description="A data room-specific sub-categorization for assetDataCategory"
     )
+    assetTypeInfo: Optional[str] = Field(default=None, description="Additional type-specific information for the asset")
     transferTypeFlag: Optional[DataSetTransfer] = Field(
         default=None, description="Describes whether an asset grows steadily over time "
     )
