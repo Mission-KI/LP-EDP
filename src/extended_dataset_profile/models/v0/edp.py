@@ -476,6 +476,7 @@ class ExtendedDatasetProfile(BaseModel):
         default=None,
         description="The periodicity of the index date time field of the first structured dataset",
     )
+    assetSha256Hash: str = Field(description="Cryptographic sha-256 hash of the asset")
 
     archiveDatasets: List[ArchiveDataSet] = Field(
         default_factory=list, description="Metadata for all archives detected"
