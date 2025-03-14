@@ -183,7 +183,9 @@ class DateTimeColumn(_BaseColumn):
 
 
 class StringColumn(_BaseColumn):
-    pass
+    distributionGraph: Optional[FileReference] = Field(
+        description="Graph of the distribution of string values, if enough unique values where present."
+    )
 
 
 class CorrelationSummary(BaseModel):
