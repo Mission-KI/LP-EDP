@@ -35,9 +35,13 @@ def _assert_has_static_indices_only(current_type: type):
             _assert_has_static_indices_only(field_type)
     elif current_type is Language:
         return
-    elif get_origin(current_type) in [list, set]:
+    elif get_origin(current_type) in [list, set, tuple]:
         for generic_type in get_args(current_type):
             _assert_has_static_indices_only(generic_type)
+    elif get_origin(current_type) is dict:
+        raise TypeError(
+            f'Found forbidden type dictionary: "{current_type}". These would lead to an index explosion in Elastic.'
+        )
     elif get_origin(current_type) is Union:
         # Special case for optional, which is allowed. get_origin(Optional) will always result in Union.
         args = get_args(current_type)

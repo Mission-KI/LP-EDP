@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import PurePosixPath
-from typing import Dict, Iterator, List, Literal, Optional, Set, Union
+from typing import Dict, Iterator, List, Literal, Optional, Set, Tuple, Union
 
 from pydantic import AnyUrl, BaseModel, Field, model_validator
 
@@ -383,6 +383,10 @@ class UnstructuredTextDataSet(BaseModel):
         default_factory=list, description="Chunks that are identified to contain tables."
     )
     languages: Set[Language] = Field(description="Set of ISO639-3 languages identifiers detected in the text.")
+    wordCloud: List[Tuple[str, int]] = Field(
+        default_factory=list,
+        description="List of (word, frequency) pairs representing the most frequently occurring words in the text.",
+    )
     lineCount: int = Field(description="Number of lines (excluding embedded tables) inside the text block.")
     wordCount: int = Field(description="Number of words (excluding embedded tables) inside the text block.")
 
