@@ -5,16 +5,18 @@ from types import NoneType
 from typing import Literal, Union, get_args, get_origin
 from uuid import UUID
 
+import pytest
+from packaging.version import Version
 from pydantic import AnyUrl, BaseModel
 
-from extended_dataset_profile import SchemaVersion, schema_versions
+from extended_dataset_profile import CURRENT_SCHEMA
 from extended_dataset_profile.models.v0.edp import Numeric
 from extended_dataset_profile.models.v0.languages import Language
 
 
 # This tests, whether the EDP is always index able with a finite amount of indices.
 def test_finite_edp_index():
-    _assert_has_static_indices_only(schema_versions[SchemaVersion.V0])
+    _assert_has_static_indices_only(CURRENT_SCHEMA)
 
 
 def _assert_has_static_indices_only(current_type: type):
@@ -60,3 +62,36 @@ def _assert_has_static_indices_only(current_type: type):
         )
     else:
         raise NotImplementedError(f'The check for "{current_type}" is not yet implemented.')
+
+
+def test_schema_version_alias():
+    edp = CURRENT_SCHEMA.model_validate(
+        {
+            "schema_version": "0.0.0",
+            "name": "test",
+            "generatedBy": "test",
+            "freely_available": True,
+            "volume": 1,
+            "assetSha256Hash": "test",
+        }
+    )
+
+    assert Version(edp.schemaVersion) == Version("0.0.0")
+
+    edp_dump = edp.model_dump_json(by_alias=True)
+    assert "schemaVersion" in edp_dump
+    assert "schema_version" not in edp_dump
+
+
+def test_schema_version_major_mismatch_error():
+    with pytest.raises(ValueError, match="schemaVersion 1.0.0 does not match expected major version '0'"):
+        CURRENT_SCHEMA.model_validate(
+            {
+                "schema_version": "1.0.0",
+                "name": "test",
+                "generatedBy": "test",
+                "freely_available": True,
+                "volume": 1,
+                "assetSha256Hash": "test",
+            }
+        )

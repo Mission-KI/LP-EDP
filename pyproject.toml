@@ -12,7 +12,10 @@ authors = [
     { name = "Joshua Lauterbach", email = "jl@beebucket.de" },
 ]
 requires-python = ">=3.11"
-dependencies = ["pydantic>=2.10.5"]
+dependencies = [
+    "packaging>=24.2",
+    "pydantic>=2.10.5",
+]
 
 [project.scripts]
 export_edp_schema = "extended_dataset_profile:export_schema"
@@ -28,6 +31,9 @@ test = [
 
 [tool.hatch.version]
 source = "vcs"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "src/extended_dataset_profile/_version.py"
 
 [tool.ruff]
 line-length = 120

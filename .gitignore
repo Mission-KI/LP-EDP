@@ -7,3 +7,4 @@ uv.lock
 .coverage
 .venv
 .vscode
+src/extended_dataset_profile/_version.py

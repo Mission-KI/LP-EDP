@@ -1,13 +1,20 @@
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import PurePosixPath
-from typing import Dict, Iterator, List, Literal, Optional, Set, Tuple, Union
+from typing import Any, Dict, Iterator, List, Optional, Set, Tuple, Union
 
-from pydantic import AnyUrl, BaseModel, Field, model_validator
+from packaging.version import InvalidVersion, Version
+from pydantic import (
+    AnyUrl,
+    BaseModel,
+    Field,
+    field_validator,
+    model_validator,
+)
 
 from extended_dataset_profile.models.v0.json_reference import JsonReference
 from extended_dataset_profile.models.v0.languages import Language
-from extended_dataset_profile.models.version import SchemaVersion
+from extended_dataset_profile.version import CURRENT_VERSION
 
 
 class AssetProcessingStatus(str, Enum):
@@ -425,8 +432,10 @@ class AssetReference(BaseModel):
 
 
 class ExtendedDatasetProfile(BaseModel):
-    schema_version: Literal[SchemaVersion.V0] = Field(
-        default=SchemaVersion.V0, description="Version of the JSON Schema used to generate this EDP"
+    schemaVersion: str = Field(
+        default=str(CURRENT_VERSION),
+        validation_alias="schema_version",
+        description="Version of the JSON Schema used to generate this EDP",
     )
     name: str = Field(description="Name of the asset")
     assetRefs: List[AssetReference] = Field(
@@ -512,3 +521,17 @@ class ExtendedDatasetProfile(BaseModel):
         default_factory=list,
         description="List of tree nodes that describe the hierarchy of the datasets contained in this extended dataset profile.",
     )
+
+    @field_validator("schemaVersion", mode="before")
+    @classmethod
+    def parse_version(cls, value: Any) -> str:
+        if isinstance(value, str):
+            try:
+                MAJOR_VERSION = 0
+                version = Version(value)
+                if MAJOR_VERSION != version.major:
+                    raise ValueError(f"schemaVersion {value} does not match expected major version '{MAJOR_VERSION}'")
+                return value
+            except InvalidVersion:
+                raise ValueError(f"Invalid schema version '{value}'")
+        raise ValueError(f"Invalid schema version '{value}'")
