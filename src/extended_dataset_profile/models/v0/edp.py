@@ -18,33 +18,49 @@ from extended_dataset_profile.version import CURRENT_VERSION
 
 
 class AssetProcessingStatus(str, Enum):
+    """Marks what kind of data an asset contains.
+
+    The rough order of operations is:
+    Original Data -> Processed Data -> Refined Data -> AI/ML Result Data.
+    """
+
     original_data = "Original Data"
     processed_data = "Processed Data"
     refined_data = "Refined Data"
     ai_ml_result_data = "AI/ML Result Data"
 
 
-class DataSetVolume(str, Enum):
-    kb = "KB"
-    mb = "MB"
-    gb = "GB"
-    tb = "TB"
-    pb = "PB"
+class AssetTransferType(str, Enum):
+    """Whether an asset was statically uploaded once or gets updated/inflated on a regular basis."""
 
-
-class DataSetFrequency(str, Enum):
-    second = "second"
-    minute = "minute"
-    hour = "hour"
-    day = "day"
-
-
-class DataSetTransfer(str, Enum):
     static = "static"
     frequent = "inflationary"
 
 
-class DataSetImmutability(str, Enum):
+class AssetGrowthRate(str, Enum):
+    """Rate at which an asset grows."""
+
+    b_d = "Bytes/day"
+    kb_d = "KiloBytes/day"
+    mb_d = "MegaBytes/day"
+    gb_d = "GigaBytes/day"
+    tb_d = "TeraBytes/day"
+    pb_d = "PetaBytes/day"
+
+
+class AssetUpdatePeriod(str, Enum):
+    """Describes how often an asset is updated"""
+
+    static = "static"
+    second = "updates by second"
+    minute = "updates by minute"
+    hour = "updates by hour"
+    day = "updates by day"
+
+
+class AssetImmutability(str, Enum):
+    """Whether the data set can be modified in the given data spaces"""
+
     immutable = "immutable"
     not_immutable = "not-immutable"
 
@@ -107,6 +123,8 @@ class ArchiveDataSet(BaseModel):
 
 
 class Augmentation(BaseModel):
+    """Information about how a column of a dataset has been augmented or created."""
+
     sourceColumns: List[str] = Field(description="List of source columns on which the augmented column is based")
     formula: Optional[str] = Field(
         default=None,
@@ -399,11 +417,15 @@ class UnstructuredTextDataSet(BaseModel):
 
 
 class Publisher(BaseModel):
+    """The entity that uploaded a data set / asset"""
+
     name: str = Field(description="Name of the publisher")
     url: Optional[str] = Field(default=None, description="URL to the publisher")
 
 
 class License(BaseModel):
+    """A license of some sort. Can contain a name and URL, but must specify at least one."""
+
     name: Optional[str] = Field(default=None, description="Name of the license")
     url: Optional[str] = Field(default=None, description="URL describing the license")
 
@@ -415,15 +437,19 @@ class License(BaseModel):
 
 
 class DataSpace(BaseModel):
-    name: str = Field(description="Name of the dataspace")
-    url: str = Field(description="URL of the dataspace")
+    """Represents a data space."""
+
+    name: str = Field(description="Name of the data space")
+    url: str = Field(description="URL of the data space")
 
 
 class AssetReference(BaseModel):
-    assetId: str = Field(description="Unique identifier for an asset within the dataspace")
-    assetUrl: AnyUrl = Field(description="URL where the asset can be found in the published dataspace")
+    """Reference to a dataset in a data space."""
+
+    assetId: str = Field(description="Unique identifier for an asset within the data space")
+    assetUrl: AnyUrl = Field(description="URL where the asset can be found in the published data space")
     assetVersion: Optional[str] = Field(default=None, description="Provide supplied version of the asset")
-    dataSpace: DataSpace = Field(description="Dataspace the asset can be found")
+    dataSpace: DataSpace = Field(description="Data space the asset can be found in")
     publisher: Publisher = Field(description="Provider that placed the asset in the data room")
     publishDate: datetime = Field(description="Date on which this asset has been published")
     license: License = Field(
@@ -459,18 +485,17 @@ class ExtendedDatasetProfile(BaseModel):
     generatedBy: str = Field(
         description="Name and version of the toolchain that generated this extended dataset profile"
     )
-    transferTypeFlag: Optional[DataSetTransfer] = Field(
-        default=None, description="Describes whether an asset grows steadily over time "
+    transferTypeFlag: Optional[AssetTransferType] = Field(
+        default=None, description="Describes whether an asset grows steadily over time."
     )
-    immutabilityFlag: Optional[DataSetImmutability] = Field(default=None, description="Is the dataset immutable")
-    growthFlag: Optional[DataSetVolume] = Field(
+    transferTypeFrequency: Optional[AssetUpdatePeriod] = Field(
+        default=None, description="Describes how often a data set is updated."
+    )
+    growthFlag: Optional[AssetGrowthRate] = Field(
         default=None,
-        description="If transfer is frequent, this parameter gives the growth rate of the dataset per day",
+        description="Growth rate of the dataset per day",
     )
-    transferTypeFrequency: Optional[DataSetFrequency] = Field(
-        default=None,
-        description="If transfer is frequent, this parameter gives the update frequency",
-    )
+    immutabilityFlag: Optional[AssetImmutability] = Field(default=None, description="Is the dataset immutable")
     nda: Optional[str] = Field(
         default=None, description="Identifier that describes or links to the non disclosure agreement"
     )
