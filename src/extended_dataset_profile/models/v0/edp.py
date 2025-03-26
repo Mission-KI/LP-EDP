@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import PurePosixPath
-from typing import Any, Dict, Iterator, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, Iterator, List, Optional, Set, Union
 
 from packaging.version import InvalidVersion, Version
 from pydantic import (
@@ -404,12 +404,21 @@ class EmbeddedTable(Chunk):
     )
 
 
+class WordFrequency(BaseModel):
+    """
+    How often a word occurred.
+    """
+
+    word: str = Field(description="Word that was counted. This might already be normalized.")
+    count: int = Field(description="Number of times it occurred.")
+
+
 class UnstructuredTextDataSet(BaseModel):
     embeddedTables: List[EmbeddedTable] = Field(
         default_factory=list, description="Chunks that are identified to contain tables."
     )
     languages: Set[Language] = Field(description="Set of ISO639-3 languages identifiers detected in the text.")
-    wordCloud: List[Tuple[str, int]] = Field(
+    wordCloud: List[WordFrequency] = Field(
         default_factory=list,
         description="List of (word, frequency) pairs representing the most frequently occurring words in the text.",
     )
