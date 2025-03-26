@@ -1,3 +1,4 @@
+import typing
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import PurePosixPath
@@ -37,6 +38,14 @@ def _assert_has_static_indices_only(current_type: type):
             _assert_has_static_indices_only(field_type)
     elif current_type is Language:
         return
+    elif get_origin(current_type) in [tuple, typing.Tuple]:
+        args = get_args(current_type)
+        if (len(args) == 2) and ((None in args) or (NoneType in args)):
+            # Special case for Optional
+            for arg in args:
+                _assert_has_static_indices_only(arg)
+        else:
+            raise TypeError("Tuples can not get indexed by elastic, since it thinks they are heterogenous arrays.s")
     elif get_origin(current_type) in [list, set, tuple]:
         for generic_type in get_args(current_type):
             _assert_has_static_indices_only(generic_type)
