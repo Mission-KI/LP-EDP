@@ -1,4 +1,4 @@
-from packaging.version import Version
+from extended_dataset_profile.types.version import Version
 
 try:
     from ._version import __version__

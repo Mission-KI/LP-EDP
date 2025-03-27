@@ -7,12 +7,27 @@ from typing import Literal, Union, get_args, get_origin
 from uuid import UUID
 
 import pytest
-from packaging.version import Version
 from pydantic import AnyUrl, BaseModel
 
 from extended_dataset_profile import CURRENT_SCHEMA
 from extended_dataset_profile.models.v0.edp import Numeric
 from extended_dataset_profile.models.v0.languages import Language
+from extended_dataset_profile.types.version import Version
+
+EXPLICITLY_ALLOWED_TYPES = [
+    NoneType,
+    str,
+    int,
+    float,
+    complex,
+    bool,
+    datetime,
+    timedelta,
+    PurePosixPath,
+    AnyUrl,
+    UUID,
+    Version,
+]
 
 
 # This tests, whether the EDP is always index able with a finite amount of indices.
@@ -22,7 +37,8 @@ def test_finite_edp_index():
 
 def _assert_has_static_indices_only(current_type: type):
     """Check if the given type is valid for the EDPS model (it must not allow custom indices for fields)."""
-    if current_type in [NoneType, str, int, float, complex, bool, datetime, timedelta, PurePosixPath, AnyUrl, UUID]:
+
+    if current_type in EXPLICITLY_ALLOWED_TYPES:
         return
     elif get_origin(current_type) == Literal:
         return
@@ -73,30 +89,11 @@ def _assert_has_static_indices_only(current_type: type):
         raise NotImplementedError(f'The check for "{current_type}" is not yet implemented.')
 
 
-def test_schema_version_alias():
-    edp = CURRENT_SCHEMA.model_validate(
-        {
-            "schema_version": "0.0.0",
-            "name": "test",
-            "generatedBy": "test",
-            "freely_available": True,
-            "volume": 1,
-            "assetSha256Hash": "test",
-        }
-    )
-
-    assert Version(edp.schemaVersion) == Version("0.0.0")
-
-    edp_dump = edp.model_dump_json(by_alias=True)
-    assert "schemaVersion" in edp_dump
-    assert "schema_version" not in edp_dump
-
-
 def test_schema_version_major_mismatch_error():
     with pytest.raises(ValueError, match="schemaVersion 1.0.0 does not match expected major version '0'"):
         CURRENT_SCHEMA.model_validate(
             {
-                "schema_version": "1.0.0",
+                "schemaVersion": "1.0.0",
                 "name": "test",
                 "generatedBy": "test",
                 "freely_available": True,
