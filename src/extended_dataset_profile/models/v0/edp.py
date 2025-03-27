@@ -317,20 +317,6 @@ class ImageDataSet(BaseModel):
     )
 
 
-class VideoCodec(Enum):
-    H264 = "h264"
-    HEVC = "hevc"
-    MPEG4 = "mpeg4"
-    VP9 = "vp9"
-    AV1 = "av1"
-    PRORES = "prores"
-    DNXHD = "dnxhd"
-    H263 = "h263"
-    FLV1 = "flv1"
-    WMV2 = "wmv2"
-    UNKNOWN = "unknown"
-
-
 class VideoPixelFormat(Enum):
     YUV420P = "yuv420p"
     YUV422P = "yuv422p"
@@ -346,11 +332,23 @@ class VideoPixelFormat(Enum):
 
 
 class VideoDataSet(BaseModel):
-    codec: VideoCodec = Field(description="The format codec of the video, such as H264 or HEVC")
-    resolution: Resolution = Field(description="Dimensions of the video in pixels")
-    fps: float = Field(description="Frames per second of the video")
-    duration: float = Field(description="Duration of the video in seconds")
-    pixel_format: VideoPixelFormat = Field(description="Pixel format of the video")
+    codec: str = Field(description="The format codec of the video, such as H264 or HEVC")
+    resolution: Optional[Resolution] = Field(description="Dimensions of the video in pixels")
+    fps: Optional[float] = Field(description="Frames per second of the video")
+    duration: Optional[float] = Field(description="Duration of the video in seconds")
+    pixelFormat: VideoPixelFormat = Field(description="Pixel format of the video")
+
+
+class AudioDataSet(BaseModel):
+    codec: str = Field(description="Codec of the audio, such as MP3")
+    channels: int = Field(description="Number of audio channels")
+    duration: Optional[float] = Field(description="Duration of the audio in seconds")
+    sampleRate: Optional[int] = Field(description="Number of samples per second")
+    bitRate: Optional[int] = Field(description="Bits per second in the encoded file")
+    bitsPerSample: Optional[int] = Field(description="Bits per sample")
+    spectrogram: FileReference = Field(
+        description="Link to the spectrogram representing the frequency distribution over time"
+    )
 
 
 class ModificationState(str, Enum):
@@ -546,6 +544,10 @@ class ExtendedDatasetProfile(BaseModel):
     videoDatasets: List[VideoDataSet] = Field(
         default_factory=list,
         description="Metadata for all datasets detected to be videos",
+    )
+    audioDatasets: List[AudioDataSet] = Field(
+        default_factory=list,
+        description="Metadata for all datasets detected to be audio",
     )
     documentDatasets: List[DocumentDataSet] = Field(
         default_factory=list,
