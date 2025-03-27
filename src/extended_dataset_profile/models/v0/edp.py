@@ -61,6 +61,10 @@ class AssetImmutability(str, Enum):
 
 
 class DataSetType(str, Enum):
+    """
+    Semantic type of a dataset.
+    """
+
     archive = "archive"
     structured = "structured"
     semiStructured = "semiStructured"
@@ -98,6 +102,12 @@ class FileProperties(BaseModel):
 
 
 class DatasetTreeNode(BaseModel):
+    """
+    Tree node representing a dataset.
+
+    The tree represents the semantic structure of the datasets inside an asset.
+    """
+
     dataset: JsonReference = Field(description="Reference to the dataset this node refers to.")
     datasetType: DataSetType = Field(description="Type of the dataset this tree node belongs to.")
     parent: Optional[JsonReference] = Field(
@@ -197,15 +207,19 @@ class NumericColumn(_BaseColumn):
 
 
 class TemporalCover(BaseModel):
-    earliest: datetime
-    latest: datetime
+    """
+    The datetime range covered by a dataset.
+    """
+
+    earliest: datetime = Field(description="Earliest timestamp present in the dataset")
+    latest: datetime = Field(description="Latest timestamp present in the dataset")
 
 
 class DateTimeColumn(_BaseColumn):
-    temporalCover: TemporalCover
-    all_entries_are_unique: bool
-    monotonically_increasing: bool
-    monotonically_decreasing: bool
+    temporalCover: TemporalCover = Field(description="The datetime range covered by a dataset")
+    all_entries_are_unique: bool = Field(description="Whether every timestamp in this column only ever exists once")
+    monotonically_increasing: bool = Field(description="True when every timestamp is later than the previous one")
+    monotonically_decreasing: bool = Field(description="True when every timestamp is earlier than the previous one")
     periodicity: Optional[str] = Field(default=None, description="The main periodicity found for this column")
     temporalConsistencies: List[TemporalConsistency] = Field(description="Temporal consistency at given timescale")
     format: str = Field(description="Datetime format used for parsing")
@@ -224,6 +238,10 @@ class CorrelationSummary(BaseModel):
 
 
 class StructuredDataSet(BaseModel):
+    """
+    Metadata for all datasets detected to be structured (tables).
+    """
+
     rowCount: int = Field(
         description="Number of row",
     )
@@ -258,6 +276,10 @@ class StructuredDataSet(BaseModel):
 
 
 class SemiStructuredDataSet(BaseModel):
+    """
+    Metadata for all datasets detected to be semi-structured.
+    """
+
     jsonSchema: str = Field(description="JSON schema of the semi-structured data")
 
 
@@ -286,6 +308,10 @@ class ImageDPI(BaseModel):
 
 
 class ImageDataSet(BaseModel):
+    """
+    Metadata for all datasets detected to be images.
+    """
+
     codec: str = Field(description="The format codec of the image, such as JPEG or PNG")
     colorMode: ImageColorMode = Field(description="Color mode of the image, such as RGB, CMYK, Grayscale, etc.")
     resolution: Resolution = Field(description="Dimensions of the image in pixels")
@@ -328,6 +354,10 @@ class VideoPixelFormat(Enum):
 
 
 class VideoDataSet(BaseModel):
+    """
+    Metadata for all datasets detected to be videos.
+    """
+
     codec: str = Field(description="The format codec of the video, such as H264 or HEVC")
     resolution: Optional[Resolution] = Field(description="Dimensions of the video in pixels")
     fps: Optional[float] = Field(description="Frames per second of the video")
@@ -336,6 +366,10 @@ class VideoDataSet(BaseModel):
 
 
 class AudioDataSet(BaseModel):
+    """
+    Metadata for all datasets detected to be audios.
+    """
+
     codec: str = Field(description="Codec of the audio, such as MP3")
     channels: int = Field(description="Number of audio channels")
     duration: Optional[float] = Field(description="Duration of the audio in seconds")
@@ -408,6 +442,10 @@ class WordFrequency(BaseModel):
 
 
 class UnstructuredTextDataSet(BaseModel):
+    """
+    Metadata for all datasets detected to be unstructured text (e.g. txt files).
+    """
+
     embeddedTables: List[EmbeddedTable] = Field(
         default_factory=list, description="Chunks that are identified to contain tables."
     )
@@ -462,6 +500,10 @@ class AssetReference(BaseModel):
 
 
 class ExtendedDatasetProfile(ExtendedDatasetProfileBase):
+    """
+    The extended dataset profile which represents the semantic information of a data asset.
+    """
+
     @staticmethod
     def _get_version() -> Version:
         return CURRENT_VERSION

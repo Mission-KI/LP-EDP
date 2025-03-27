@@ -12,10 +12,7 @@ authors = [
     { name = "Joshua Lauterbach", email = "jl@beebucket.de" },
 ]
 requires-python = ">=3.11"
-dependencies = [
-    "packaging>=24.2",
-    "pydantic>=2.10.5",
-]
+dependencies = ["packaging>=24.2", "pydantic>=2.10.5"]
 
 [project.scripts]
 export_edp_schema = "extended_dataset_profile:export_schema"
@@ -27,6 +24,7 @@ test = [
     "pytest>=8.3.4",
     "pytest-cov>=6.0.0",
     "ruff>=0.9.2",
+    "pydantic-markdown",
 ]
 
 [tool.hatch.version]
@@ -60,3 +58,6 @@ sqlite_cache = true
 
 [tool.coverage.run]
 relative_files = true
+
+[tool.uv.sources]
+pydantic-markdown = { git = "https://github.com/Beebucket/pydantic_markdown", rev = "2.0.3" }
