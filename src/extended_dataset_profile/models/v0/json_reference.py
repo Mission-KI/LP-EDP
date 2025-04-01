@@ -8,7 +8,15 @@ _JSON_REFERENCE_REGEX = re.compile(f"#(\\/[{_JSON_KEY_CHARACTERS}]+)+")
 
 
 class JsonReference(BaseModel):
-    reference: str = Field(serialization_alias="$ref", validation_alias=AliasChoices("$ref", "reference"))
+    """
+    A reference to another field within the same JSON file.
+    """
+
+    reference: str = Field(
+        serialization_alias="$ref",
+        validation_alias=AliasChoices("$ref", "reference"),
+        description="The JSON keys that lead to the referred value.",
+    )
 
     @field_validator("reference", mode="after")
     @classmethod

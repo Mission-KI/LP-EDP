@@ -84,18 +84,26 @@ class DataSetCompression(str, Enum):
 
 
 class TemporalConsistency(BaseModel):
+    """
+    How many gaps and unique values are present when resampled to a given time scale.
+    """
+
     timeScale: str = Field(description="Time scale this temporal consistency has been tested for")
     differentAbundancies: int = Field(description="Number of unique values on given time resolution")
     stable: bool = Field(description="The value stays stable on the given time resolution")
     numberOfGaps: int = Field(description="Number of gaps at the given timescale")
 
 
-Numeric = Union[int, float, timedelta, complex]
+Numeric = Union[int, float, timedelta]
 
 FileReference = PurePosixPath
 
 
 class FileProperties(BaseModel):
+    """
+    Properties regarding files that a dataset might be stored in.
+    """
+
     name: str = Field(description="Original file name")
     fileType: str = Field(description="File type")
     size: int = Field(description="Size of the file in bytes.")
@@ -157,11 +165,19 @@ class _BaseColumn(BaseModel):
 
 
 class TimeBasedGraph(BaseModel):
-    timeBaseColumn: str
-    file: FileReference
+    """
+    Represents a graph that contains a date time column as X axis.
+    """
+
+    timeBaseColumn: str = Field(description="Name of the date time column which was used as time base")
+    file: FileReference = Field(description="File which contains the image of the graph")
 
 
 class NumericColumn(_BaseColumn):
+    """
+    Information on numeric columns inside a structured dataset.
+    """
+
     min: Numeric = Field(description="Minimum value that occurred in this column")
     max: Numeric = Field(description="Maximum value that occurred in this column")
     mean: Numeric = Field(description="Mean of all values in this column")
@@ -216,6 +232,10 @@ class TemporalCover(BaseModel):
 
 
 class DateTimeColumn(_BaseColumn):
+    """
+    Information specific to columns containing date times.
+    """
+
     temporalCover: TemporalCover = Field(description="The datetime range covered by a dataset")
     all_entries_are_unique: bool = Field(description="Whether every timestamp in this column only ever exists once")
     monotonically_increasing: bool = Field(description="True when every timestamp is later than the previous one")
@@ -226,12 +246,18 @@ class DateTimeColumn(_BaseColumn):
 
 
 class StringColumn(_BaseColumn):
+    """Information of columns containing string."""
+
     distributionGraph: Optional[FileReference] = Field(
         description="Graph of the distribution of string values, if enough unique values where present."
     )
 
 
 class CorrelationSummary(BaseModel):
+    """
+    Information about how often which kind of correlation is present.
+    """
+
     no: int = Field(default=0, description="Count of column pairs with no correlation")
     partial: int = Field(default=0, description="Count of column pairs with partial correlation")
     strong: int = Field(default=0, description="Count of column pairs with strong correlation")
@@ -284,6 +310,10 @@ class SemiStructuredDataSet(BaseModel):
 
 
 class ImageColorMode(str, Enum):
+    """
+    Color mode of the image, such as RGB, CMYK, Grayscale, etc.
+    """
+
     BLACK_AND_WHITE = "1"
     GRAYSCALE = "L"
     PALETTED = "P"
@@ -298,11 +328,19 @@ class ImageColorMode(str, Enum):
 
 
 class Resolution(BaseModel):
+    """
+    Dimensions of a video or image in pixels.
+    """
+
     width: int = Field(ge=0, description="Width in pixels")
     height: int = Field(ge=0, description="Height in pixels")
 
 
 class ImageDPI(BaseModel):
+    """
+    How many dots per inch an image or video contains on each axis.
+    """
+
     x: float = Field(ge=0.0, description="Dots Per Inch (DPI) along the x-axis")
     y: float = Field(ge=0.0, description="Dots Per Inch (DPI) along the y-axis")
 
@@ -340,6 +378,10 @@ class ImageDataSet(BaseModel):
 
 
 class VideoPixelFormat(Enum):
+    """
+    The format in which the single pixels are stored inside the video.
+    """
+
     YUV420P = "yuv420p"
     YUV422P = "yuv422p"
     YUV444P = "yuv444p"
@@ -382,6 +424,10 @@ class AudioDataSet(BaseModel):
 
 
 class ModificationState(str, Enum):
+    """
+    Whether a document was detected to have been modified since its creation.
+    """
+
     modified = "modified"
     unmodified = "unmodified"
     unknown = "unknown"
@@ -406,7 +452,9 @@ class DocumentDataSet(BaseModel):
     docType: str = Field(description="Document type, e.g. PDF-1.6")
     numPages: Optional[int] = Field(description="Number of pages in the document")
     numImages: int = Field(description="Number of images in the document")
-    modified: ModificationState = Field(description="Modified from original version?")
+    modified: ModificationState = Field(
+        description="Whether a document was detected to have been modified since its creation"
+    )
     encrypted: bool = Field(description="Encrypted")
 
 
@@ -427,6 +475,10 @@ class Chunk(BaseModel):
 
 
 class EmbeddedTable(Chunk):
+    """
+    Marks the existence of a table within a unstructured text dataset.
+    """
+
     structuredDatasetName: str = Field(
         description="Name of the structured dataset this embedded dataset got analyzed as."
     )
