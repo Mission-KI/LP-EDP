@@ -48,6 +48,7 @@ extend-select = [
 [tool.pytest.ini_options]
 log_cli = true
 log_cli_level = "INFO"
+filterwarnings = ["error"]
 
 [tool.mypy]
 warn_return_any = true
