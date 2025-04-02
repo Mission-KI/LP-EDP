@@ -21,6 +21,14 @@ class Version(_BuiltinVersion):
         )
 
     @classmethod
+    def __get_pydantic_reference__(cls, type_reference_map) -> str:
+        return "Semantic Version"
+
+    @classmethod
+    def __print_pydantic_markdown__(cls, type_reference_map, writer) -> None:
+        pass
+
+    @classmethod
     def _validate(cls, object: Union[_BuiltinVersion, "Version", Any]) -> "Version":
         if isinstance(object, Version):
             return object
