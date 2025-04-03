@@ -499,6 +499,9 @@ class ExtendedDatasetProfile(ExtendedDatasetProfileBase):
         description="Growth rate of the dataset per day",
     )
     immutabilityFlag: Optional[AssetImmutability] = Field(default=None, description="Is the dataset immutable")
+    allowedForAiTraining: Optional[bool] = Field(
+        default=None, description="Whether this dataset is allowed to be used for AI training."
+    )
     nda: Optional[str] = Field(
         default=None, description="Identifier that describes or links to the non disclosure agreement"
     )
