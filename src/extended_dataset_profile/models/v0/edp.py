@@ -99,6 +99,7 @@ class FileProperties(BaseModel):
 
 class DatasetTreeNode(BaseModel):
     dataset: JsonReference = Field(description="Reference to the dataset this node refers to.")
+    datasetType: DataSetType = Field(description="Type of the dataset this tree node belongs to.")
     parent: Optional[JsonReference] = Field(
         default=None, description="Reference to the dataset tree node of the parent dataset, if any"
     )
