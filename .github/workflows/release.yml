@@ -106,7 +106,6 @@ jobs:
             - name: Release
               uses: softprops/action-gh-release@v2
               with:
-                  body: "Extended Dataset Profile Schema: ${{ github.ref_name }}\n\n"
                   body_path:  "${{ env.ARTIFACTS_DIR }}/${{ env.EDP_SCHEMA_README }}"
                   files: ${{ env.ARTIFACTS_DIR }}/*
                   fail_on_unmatched_files: true
