@@ -173,6 +173,16 @@ class TimeBasedGraph(BaseModel):
     file: FileReference = Field(description="File which contains the image of the graph")
 
 
+class Trend(str, Enum):
+    """
+    Whether the series has a trend over time
+    """
+
+    NoTrend = "No Trend"
+    Increasing = "Increasing"
+    Decreasing = "Decreasing"
+
+
 class NumericColumn(_BaseColumn):
     """
     Information on numeric columns inside a structured dataset.
@@ -205,6 +215,7 @@ class NumericColumn(_BaseColumn):
         default=None, description="Link to the combined histogram/distribution graph"
     )
     boxPlot: FileReference = Field(description="Link to the box plot of this column")
+    trend: Trend = Field(description="Whether the series has a trend over time")
     original_series: List[TimeBasedGraph] = Field(
         default_factory=list, description="Original data graphs over all available date time columns"
     )
