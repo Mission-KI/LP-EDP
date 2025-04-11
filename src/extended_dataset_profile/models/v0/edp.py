@@ -364,7 +364,9 @@ class ImageDataSet(BaseModel):
     codec: str = Field(description="The format codec of the image, such as JPEG or PNG")
     colorMode: ImageColorMode = Field(description="Color mode of the image, such as RGB, CMYK, Grayscale, etc.")
     resolution: Resolution = Field(description="Dimensions of the image in pixels")
-    dpi: ImageDPI = Field(description="Dots Per Inch (DPI) represents the image's print resolution")
+    dpi: Optional[ImageDPI] = Field(
+        description="Dots Per Inch (DPI) represents the image's print resolution. Not all images have this property."
+    )
     brightness: Optional[float] = Field(
         ge=0.0, le=255.0, description="Average brightness of the image, higher values indicate brighter images"
     )
