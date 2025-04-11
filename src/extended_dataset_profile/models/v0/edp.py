@@ -57,7 +57,7 @@ class AssetImmutability(str, Enum):
     """Whether the data set can be modified in the given data spaces"""
 
     immutable = "immutable"
-    not_immutable = "not-immutable"
+    mutable = "mutable"
 
 
 class DataSetType(str, Enum):
