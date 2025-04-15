@@ -1,6 +1,6 @@
 import pytest
 
-from extended_dataset_profile.models.v0.edp import License
+from extended_dataset_profile.models.v1.edp import License
 
 
 def test_validate_license():

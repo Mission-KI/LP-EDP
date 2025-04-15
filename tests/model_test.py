@@ -9,7 +9,7 @@ from uuid import UUID
 import pytest
 from pydantic import AnyUrl, BaseModel
 
-from extended_dataset_profile import CURRENT_SCHEMA
+from extended_dataset_profile import CURRENT_SCHEMA, schema_versions
 from extended_dataset_profile.models.v0.edp import Numeric
 from extended_dataset_profile.models.v0.languages import Language
 from extended_dataset_profile.types.version import Version
@@ -32,7 +32,8 @@ EXPLICITLY_ALLOWED_TYPES = [
 
 # This tests, whether the EDP is always index able with a finite amount of indices.
 def test_finite_edp_index():
-    _assert_has_static_indices_only(CURRENT_SCHEMA)
+    for schema in schema_versions.values():
+        _assert_has_static_indices_only(schema)
 
 
 def _assert_has_static_indices_only(current_type: type):

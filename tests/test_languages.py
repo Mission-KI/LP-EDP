@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from pytest import raises
 
-from extended_dataset_profile.models.v0.languages import Language, is_iso639_3
+from extended_dataset_profile.models.v1.languages import Language, is_iso639_3
 
 
 class Model(BaseModel):

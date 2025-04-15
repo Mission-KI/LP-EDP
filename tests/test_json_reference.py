@@ -1,6 +1,6 @@
 import pytest
 
-from extended_dataset_profile.models.v0.json_reference import JsonReference
+from extended_dataset_profile.models.v1.json_reference import JsonReference
 
 
 def test_json_reference_does_not_match_empty():

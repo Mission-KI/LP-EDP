@@ -9,6 +9,7 @@ from extended_dataset_profile.models.base import ExtendedDatasetProfileBase
 from extended_dataset_profile.models.v0.json_reference import JsonReference
 from extended_dataset_profile.models.v0.languages import Language
 from extended_dataset_profile.types.version import Version
+from extended_dataset_profile.version import CURRENT_VERSION
 
 
 class AssetProcessingStatus(str, Enum):
@@ -570,7 +571,7 @@ class ExtendedDatasetProfile(ExtendedDatasetProfileBase):
 
     @staticmethod
     def _get_version() -> Version:
-        return Version("0.26.1")
+        return CURRENT_VERSION
 
     name: str = Field(description="Name of the asset")
     assetRefs: List[AssetReference] = Field(
