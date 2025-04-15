@@ -6,10 +6,11 @@ from typing import Dict, Iterator, List, Optional, Set, Union
 from pydantic import AnyUrl, BaseModel, Field, model_validator
 
 from extended_dataset_profile.models.base import ExtendedDatasetProfileBase
-from extended_dataset_profile.models.v0.json_reference import JsonReference
-from extended_dataset_profile.models.v0.languages import Language
 from extended_dataset_profile.types.version import Version
 from extended_dataset_profile.version import CURRENT_VERSION
+
+from .json_reference import JsonReference
+from .languages import Language
 
 
 class AssetProcessingStatus(str, Enum):
